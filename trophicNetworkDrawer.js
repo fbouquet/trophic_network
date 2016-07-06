@@ -9,13 +9,6 @@
  */
 class TrophicNetworkDrawer {
 	constructor() {
-		if (typeof _ === 'undefined') {
-			let error = 'Please load Underscore.js or lodash before you load TrophicNetworkDrawer.';
-			console.log(error);
-			alert(error);
-			return;
-		}
-
 		this.canvas = null;
 		this.ctx = null;
 		this.predatorsPop = [];
@@ -114,7 +107,7 @@ class TrophicNetworkDrawer {
 		this.occupationPreysPerOtherPredators = occupationPreysPerOtherPredators;
 
 		// Then, update optional values with the provided one
-		this.options = _.extend(this.options, options);
+		this.options = Object.assign(this.options, options);
 
 		// Finally, draw the trophic network
 		this.draw();
@@ -163,13 +156,13 @@ class TrophicNetworkDrawer {
 			alert("The other predator occupations of preys must be set for every other predators.");
 			paramsAreValid = false;
 		}
-		_.each(occupationPreysPerPredators, function(occupationPreyPerPredators, preyIndex) {
+		occupationPreysPerPredators.forEach((occupationPreyPerPredators, preyIndex) => {
 			if (this.arraySum(occupationPreysPerPredators[preyIndex]) + this.arraySum(occupationPreysPerOtherPredators[preyIndex]) !== 1.0) {
 				var preyIndexShown = preyIndex+1;
 				alert("The sum of occupations of a prey by predators plus other predators must be equal to 1 (prey index "+ preyIndexShown +").");
 				paramsAreValid = false;
 			}
-		}, this);
+		});
 
 		return paramsAreValid;
 	}
@@ -231,7 +224,7 @@ class TrophicNetworkDrawer {
 		var previousCumulatedPopPercent = 0.0;
 		// This represents the triangle origins for predators and the useful coords for preys
 		var specyCoords = [];
-		_.each(specyPopArray, function(specyPopPercent, specyIndex) {
+		specyPopArray.forEach((specyPopPercent, specyIndex) => {
 			// Compute the rectangle coordinates
 			var leftPos = previousCumulatedPopPercent * this.options.canvasWidth + this.options.separatorWidth;
 			var width = specyPopPercent * this.options.canvasWidth - this.options.separatorWidth;
@@ -272,7 +265,7 @@ class TrophicNetworkDrawer {
 								 	width: width
 				});
 			}
-		}, this);
+		});
 
 		return specyCoords;
 	}
@@ -288,12 +281,12 @@ class TrophicNetworkDrawer {
 	 */
 	drawPredatorsToPreysTriangles(occupationPreysPerPredatorsMatrix, predatorsTriangleOrigins,
 																predatorsColors, opt_toPreyRectangleBottom) {
-		_.each(occupationPreysPerPredatorsMatrix, function(occupationPredatorForCurrentPrey, preyIndex) {
+		occupationPreysPerPredatorsMatrix.forEach((occupationPredatorForCurrentPrey, preyIndex) => {
 			// For each prey
 			var leftTriangleOffsetX = 0;
 			// Retrieve the current prey's coords
 			var currentPreyCoords = this.preysCoords[preyIndex];
-			_.each(occupationPredatorForCurrentPrey, function(currentOccupationPercent, predatorIndex) {
+			occupationPredatorForCurrentPrey.forEach((currentOccupationPercent, predatorIndex) => {
 				// For each predator
 				// Compute the triangle vertices
 				var currentPredatorTriangleOrigin = predatorsTriangleOrigins[predatorIndex];
@@ -309,8 +302,8 @@ class TrophicNetworkDrawer {
 
 				// Compute the left X offset on the prey rectangle for the next triangle
 				leftTriangleOffsetX += rightTriangleVertex[0] - leftTriangleVertex[0];
-			}, this);
-		}, this);
+			});
+		});
 	}
 
 
@@ -354,7 +347,7 @@ class TrophicNetworkDrawer {
 	 */
 	arraySum(array) {
 		var sum = 0;
-		_.each(array, function(value) {
+		array.forEach((value) => {
 			sum += value;
 		});
 		// Round the sum to two decimals to avoid floating precision problems
