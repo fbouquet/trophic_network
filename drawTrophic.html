@@ -1,74 +1,74 @@
 <!--
-	Code written by Florent Bouquet (contact@florentbouquet.com), under MIT license.
-	See drawTrophic.js documentation for more details about the trophic network drawer.
+  Code written by Florent Bouquet (contact@florentbouquet.com), under MIT license.
+  See drawTrophic.js documentation for more details about the trophic network drawer.
 
-	This file must be put in the same folder as trophicNetworkDrawer.js.
-	To draw the trophic network you want, set your parameters here and open this HTML
-	file in a browser, preferably Firefox or Chrome. You can then save the image by
-	right clicking on it and clicking on "Save image as...".
+  This file must be put in the same folder as trophicNetworkDrawer.js.
+  To draw the trophic network you want, set your parameters here and open this HTML
+  file in a browser, preferably Firefox or Chrome. You can then save the image by
+  right clicking on it and clicking on "Save image as...".
 -->
 
 <html>
-	<head>
-		<script src="trophicNetworkDrawer.js"></script>
+  <head>
+    <script src="trophicNetworkDrawer.js"></script>
 
-		<script type="application/x-javascript">
-			function drawTrophicNetwork() {
-				// Population percentage array of the predators (the sum must be 1).
-				var predatorsPop = [0.5652, 0.2633, 0.1715];
-				// Population percentage array of the preys (the sum must be 1).
-				var preysPop = [0.9702, 0.0298];
-				// Population percentage array of the other predators (the sum must be 1).
-				var otherPredatorsPop = [0.0236, 0.0448, 0.0212, 0.9104];
+    <script type="application/x-javascript">
+      function drawTrophicNetwork() {
+        // Population percentage array of the predators (the sum must be 1).
+        var predatorsPop = [0.5652, 0.2633, 0.1715];
+        // Population percentage array of the preys (the sum must be 1).
+        var preysPop = [0.9702, 0.0298];
+        // Population percentage array of the other predators (the sum must be 1).
+        var otherPredatorsPop = [0.0236, 0.0448, 0.0212, 0.9104];
 
-				/**
-				 * 	Matrix of occupations from predators to preys with percentages.
-				 *	The rows are for the preys and the columns for the predators.
-				 */
-				var occupationPreysPerPredators = [
-												[0.2854, 0.1304, 0.0836],
-											 	[0.0800, 0.1200, 0.1200]
-											];
+        /**
+         * 	Matrix of occupations from predators to preys with percentages.
+         *	The rows are for the preys and the columns for the predators.
+         */
+        var occupationPreysPerPredators = [
+                        [0.2854, 0.1304, 0.0836],
+                         [0.0800, 0.1200, 0.1200]
+                      ];
 
-				/**
-				 * 	Matrix of occupations from other predators to preys with percentages.
-				 *	The rows are for the preys and the columns for the predators.
-				 */
-				var occupationPreysPerOtherPredators = [
-												[0.0098, 0.0209, 0.0086, 0.4613],
-											 	[0.0800, 0.0800, 0.0800, 0.4400]
-											];
+        /**
+         * 	Matrix of occupations from other predators to preys with percentages.
+         *	The rows are for the preys and the columns for the predators.
+         */
+        var occupationPreysPerOtherPredators = [
+                        [0.0098, 0.0209, 0.0086, 0.4613],
+                         [0.0800, 0.0800, 0.0800, 0.4400]
+                      ];
 
-				// Example of options object (see drawTrophicNetwork's documentation for more details):
-				/*
-					{
-						separatorWidth: 5,
-						rectangleHeight: 30,
-						predatorsPosY: 0,
-						preysPosY: 150,
-						otherPredatorsPosY: 300,
-						canvasWidth: 500,
-						predatorsColors: [["rgba(200,0,0,0.5)", "black"], ["rgba(0,200,0,0.5)", "black"], ["rgba(0,0,200,0.5)", "black"]],
-						preysColors: [["black", "white"]],
-						otherPredatorsColors: [["rgba(126,33,150,0.5)", "black"], ["rgba(255,85,0,0.5)", "black"], ["rgba(255,3,199,0.5)", "black"], ["rgba(107,28,0,0.5)", "black"]],
-						predatorsLabels: null,
-						preysLabels: ["my prey", "my second prey"],
-						otherPredatorsLabels: null,
-						font: "15px Arial"
-					}
-				*/
-				var options = {
+        // Example of options object (see drawTrophicNetwork's documentation for more details):
+        /*
+          {
+            separatorWidth: 5,
+            rectangleHeight: 30,
+            predatorsPosY: 0,
+            preysPosY: 150,
+            otherPredatorsPosY: 300,
+            canvasWidth: 500,
+            predatorsColors: [["rgba(200,0,0,0.5)", "black"], ["rgba(0,200,0,0.5)", "black"], ["rgba(0,0,200,0.5)", "black"]],
+            preysColors: [["black", "white"]],
+            otherPredatorsColors: [["rgba(126,33,150,0.5)", "black"], ["rgba(255,85,0,0.5)", "black"], ["rgba(255,3,199,0.5)", "black"], ["rgba(107,28,0,0.5)", "black"]],
+            predatorsLabels: null,
+            preysLabels: ["my prey", "my second prey"],
+            otherPredatorsLabels: null,
+            font: "15px Arial"
+          }
+        */
+        var options = {
 
-				};
+        };
 
-				// See detailed documentation in file drawTrophic.js
-				var trophicNetworkDrawer = new TrophicNetworkDrawer();
-				trophicNetworkDrawer.drawTrophicNetwork(predatorsPop, preysPop, otherPredatorsPop,
-														occupationPreysPerPredators, occupationPreysPerOtherPredators, options);
-			}
-		</script>
-	</head>
-	<body onload="drawTrophicNetwork()">
-		<canvas id="canvas"></canvas>
-	</body>
+        // See detailed documentation in file drawTrophic.js
+        var trophicNetworkDrawer = new TrophicNetworkDrawer();
+        trophicNetworkDrawer.drawTrophicNetwork(predatorsPop, preysPop, otherPredatorsPop,
+                            occupationPreysPerPredators, occupationPreysPerOtherPredators, options);
+      }
+    </script>
+  </head>
+  <body onload="drawTrophicNetwork()">
+    <canvas id="canvas"></canvas>
+  </body>
 </html>
