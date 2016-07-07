@@ -24,6 +24,9 @@ class TrophicNetworkDrawer {
     this.options = {
       separatorWidth: 5,
       rectangleHeight: 30,
+      spaceBetweenLevels: 150,
+      defaultFillColor: "black",
+      defaultTextColor: "white",
       predatorsPosY: 0,
       preysPosY: 150,
       otherPredatorsPosY: 300,
@@ -91,184 +94,328 @@ class TrophicNetworkDrawer {
    * @param {Array<Array<number>>} occupationPreysPerOtherPredators Matrix of occupations from other predators to preys with percentages.
    * @param {Object} options Drawing options (see supported options above).
    */
-  drawTrophicNetwork(predatorsPop, preysPop, otherPredatorsPop,
+  drawTrophicNetwork(trophicLevels, predatorsPop, preysPop, otherPredatorsPop,
                      occupationPreysPerPredators, occupationPreysPerOtherPredators,
                      options) {
     // Firstly, validate the mandatory values
-    var paramsAreValid = this.validateMandatoryValues(predatorsPop, preysPop, otherPredatorsPop,
-                occupationPreysPerPredators, occupationPreysPerOtherPredators);
-    if (!paramsAreValid) { return; }
-
-    // The mandatory values are correct: use them
-    this.predatorsPop = predatorsPop;
-    this.preysPop = preysPop;
-    this.otherPredatorsPop = otherPredatorsPop;
-    this.occupationPreysPerPredators = occupationPreysPerPredators;
-    this.occupationPreysPerOtherPredators = occupationPreysPerOtherPredators;
-
-    // Then, update optional values with the provided one
-    this.options = Object.assign(this.options, options);
-
-    // Finally, draw the trophic network
-    this.draw();
+    return this.validateTrophicLevels(trophicLevels).then(() => {
+      return this.draw(trophicLevels);
+    }).catch((error) => {
+      alert("Could not draw the trophic network with the given trophic levels data: see the console logs.\n");
+      console.log(error);
+    });
+    // var paramsAreValid = this.validateMandatoryValues(predatorsPop, preysPop, otherPredatorsPop,
+    //             occupationPreysPerPredators, occupationPreysPerOtherPredators);
+    // if (!paramsAreValid) { return; }
+    //
+    // // The mandatory values are correct: use them
+    // this.predatorsPop = predatorsPop;
+    // this.preysPop = preysPop;
+    // this.otherPredatorsPop = otherPredatorsPop;
+    // this.occupationPreysPerPredators = occupationPreysPerPredators;
+    // this.occupationPreysPerOtherPredators = occupationPreysPerOtherPredators;
+    //
+    // // Then, update optional values with the provided one
+    // this.options = Object.assign(this.options, options);
+    //
+    // // Finally, draw the trophic network
+    // this.draw();
   }
 
 
   /**
-   * Validates the parameters passed, checking that the percentage sums are equal to 1.
+   * Validates the provided trophic levels data (especially checking that the percentage sums are equal to 1).
    *
-   * @param {Array<number>} predatorsPop Population percentage array of the predators (the sum must be 1).
-   * @param {Array<number>} preysPop Population percentage array of the preys (the sum must be 1).
-   * @param {Array<number>} otherPredatorsPop Population percentage array of the other predators (the sum must be 1).
-   * @param {Array<Array<number>>} occupationPreysPerPredators Matrix of occupations from predators to preys with percentages.
-   * @param {Array<Array<number>>} occupationPreysPerOtherPredators Matrix of occupations from other predators to preys with percentages.
-   * @return {boolean} true if the parameters are valid.
+   * @param {Array<TrophicLevel>} trophicLevels Array of objects representing the trophic levels data.
+   * @return {Promise} Promise resolving if the provided trophic levels are valid, rejecting
+   *                           an error message otherwise.
    */
-  validateMandatoryValues(predatorsPop, preysPop, otherPredatorsPop,
-                          occupationPreysPerPredators, occupationPreysPerOtherPredators) {
-    var paramsAreValid = true;
+  validateTrophicLevels(trophicLevels) {
+    let errorMessage = "";
+    return new Promise((resolve, reject) => {
+      if (!trophicLevels || trophicLevels.length < 2) {
+        errorMessage += "Please provide at least two trophic levels.";
+      } else {
+        trophicLevels.forEach((trophicLevel, trophicIndex) => {
+          if (this.arraySum(trophicLevel.populations) !== 1.0) {
+            errorMessage += `The sum of populations is not equal to 1 in the trophic ` +
+              `level #${trophicIndex+1}.\n`;
+          }
 
-    if (this.arraySum(predatorsPop) !== 1.0) {
-      alert("The sum of predator populations must be equal to 1.");
-      paramsAreValid = false;
-    }
-    if (this.arraySum(preysPop) !== 1.0) {
-      alert("The sum of preys populations must be equal to 1.");
-      paramsAreValid = false;
-    }
-    if (otherPredatorsPop.length > 0 && this.arraySum(otherPredatorsPop) !== 1.0) {
-      alert("The sum of other predator populations must be equal to 1.");
-      paramsAreValid = false;
-    }
-    if (occupationPreysPerPredators.length !== preysPop.length) {
-      alert("The predator occupations of preys must be set for every preys.");
-      paramsAreValid = false;
-    }
-    if (otherPredatorsPop.length > 0 && occupationPreysPerOtherPredators.length !== preysPop.length) {
-      alert("The other predator occupations of preys must be set for every preys.");
-      paramsAreValid = false;
-    }
-    if (occupationPreysPerPredators[0].length !== predatorsPop.length) {
-      alert("The predator occupations of preys must be set for every predators.");
-      paramsAreValid = false;
-    }
-    if (otherPredatorsPop.length > 0 && occupationPreysPerOtherPredators[0].length !== otherPredatorsPop.length) {
-      alert("The other predator occupations of preys must be set for every other predators.");
-      paramsAreValid = false;
-    }
-    occupationPreysPerPredators.forEach((occupationPreyPerPredators, preyIndex) => {
-      if (this.arraySum(occupationPreysPerPredators[preyIndex]) + this.arraySum(occupationPreysPerOtherPredators[preyIndex]) !== 1.0) {
-        var preyIndexShown = preyIndex+1;
-        alert("The sum of occupations of a prey by predators plus other predators must be equal to 1 (prey index "+ preyIndexShown +").");
-        paramsAreValid = false;
+          if (trophicIndex > 0) {
+            let previousTrophicLevel = trophicLevels[trophicIndex - 1];
+
+            if (trophicLevel.occupationPerPreviousLevel.length !== trophicLevel.populations.length) {
+              errorMessage += `The number of lines in the matrix occupationPerPreviousLevel of the ` +
+                `trophic level #${trophicIndex+1} should correspond to the number of populations given ` +
+                `in the previous trophic level.\n`;
+            }
+
+            trophicLevel.occupationPerPreviousLevel.forEach((occupationMatrixLine, occupationMatrixLineIndex) => {
+              if (occupationMatrixLine.length !== previousTrophicLevel.populations.length) {
+                errorMessage += `The number of columns in the matrix occupationPerPreviousLevel of the ` +
+                  `trophic level #${trophicIndex+1} does not correspond its number of populations in ` +
+                  `the line #${occupationMatrixLineIndex+1} of the matrix.\n`;
+              }
+
+              if (this.arraySum(occupationMatrixLine) !== 1.0) {
+                errorMessage += `The total of the line #${occupationMatrixLineIndex+1} of the matrix ` +
+                  `occupationPerPreviousLevel of the trophic level #${trophicIndex+1} is not equal to 1.`;
+              }
+            });
+          }
+        });
+      }
+
+      if (errorMessage.length > 0) {
+        reject(errorMessage);
+      } else {
+        resolve();
       }
     });
-
-    return paramsAreValid;
   }
 
 
   /**
    * Draws the trophic network in the canvas element (called from drawTrophicNetwork once the parameters are set).
    * Do not call this function  directly.
+   *
+   * @param {Array<TrophicLevel>} trophicLevels Array of objects representing the trophic levels data.
+   * @return {Promise} Promise resolving if the trophic network was successfully drawn.
    */
-  draw() {
+  draw(trophicLevels) {
     this.canvas = document.getElementById("canvas");
     this.ctx = this.canvas.getContext("2d");
     this.ctx.canvas.width = this.options.canvasWidth;
     // Compute canvas height
-    var lastRectangleRowY = (this.otherPredatorsPop.length > 0) ? this.options.otherPredatorsPosY : this.options.preysPosY;
-    this.ctx.canvas.height = lastRectangleRowY + this.options.rectangleHeight;
+    this.ctx.canvas.height = trophicLevels.length * this.options.spaceBetweenLevels + this.options.rectangleHeight;
 
     // Start index for the rectangle label if not using custom labels
-    var startIndex = 1;
+    this.currentRectangleIndex = 1;
 
-    // Draw predators' rectangles and get their triangle origins
-    this.predatorsTriangleOrigin = this.drawSpecyRectangles(this.predatorsPop, this.options.predatorsPosY,
-                                 this.options.predatorsColors, this.options.predatorsLabels,
-                                 startIndex, true, true);
-    // Draw preys' rectangles and get the rectangles' coords
-    startIndex += this.predatorsPop.length;
-    this.preysCoords = this.drawSpecyRectangles(this.preysPop, this.options.preysPosY, this.options.preysColors,
-                          this.options.preysLabels, startIndex, false);
+    let trophicRectanglesPromises = trophicLevels.map((trophicLevel, trophicIndex) => {
+      return this.drawTrophicLevelRectangles(trophicLevel, trophicIndex);
+    });
 
-    // Draw other predators' rectangles and get their triangle origins
-    startIndex += this.preysPop.length;
-    this.otherPredatorsTriangleOrigin = this.drawSpecyRectangles(this.otherPredatorsPop, this.options.otherPredatorsPosY,
-                                    this.options.otherPredatorsColors, this.options.otherPredatorsLabels,
-                                    startIndex, true);
+    return Promise.all(trophicRectanglesPromises).then((rectangleCoords) => {
+      let trophicTrianglesPromises = trophicLevels.map((trophicLevel, trophicIndex) => {
+        return Promise.resolve();
+        // if (trophicIndex > 0) {
+        // 	return this.drawTrophicLevelTriangles(trophicLevel, trophicIndex, rectangleCoords[trophicIndex]);
+        // } else {
+        // 	return Promise.resolve();
+        // }
+      });
 
-    // Draw the triangles from predators to preys
-    this.drawPredatorsToPreysTriangles(this.occupationPreysPerPredators, this.predatorsTriangleOrigin, this.options.predatorsColors);
-
-    // Draw the triangles from other predators to preys
-    this.drawPredatorsToPreysTriangles(this.occupationPreysPerOtherPredators, this.otherPredatorsTriangleOrigin,
-                      this.options.otherPredatorsColors, true);
+      return Promise.all(trophicTrianglesPromises);
+    });
   }
 
 
   /**
-   * Draws a specy's rectangles to represent the population.
+   * Draws the rectangles for a trophic level to represent the population.
    *
-   * @param {Array<number>} specyPopArray Population array of the specy.
-   * @param {number} specyPosY Y position for the specy, in pixels.
-   * @param {Array<TwoColors>} specyColors Colors for the specy, where each TwoColors is like [mainColorString, textColorString].
-   * @param {Array<string>} labels Array of string labels to be drawn in the rectangles.
-   * @param {number} startIndex Start index for the label if labels parameter is null.
-   * @param {boolean} returnTriangleOriginCoords true to return an array of triangle origins, false to return other useful rectangle coords.
-   * @param {boolean} opt_triangleOriginIsOnBottom Optional, true if the triangle origin is on the bottom of the rectangle, useful only if returnTriangleOriginCoords is true.
-   * @return {Array<Point>|Array<{topLeftPoint:Point, bottomLeftPoint:Point, width:number}>} Array of triangle origins or rectangle coords for the specy, where Point is like [xPosNumber, yPosNumber].
+   * @param {TrophicLevel} trophicLevel Object representing the trophic level's data.
+   * @param {number} trophicIndex Index of the given trophic level.
+   * @return {Array<Point>|Array<{topLeftPoint:Point, width:number}>} Array of triangle origins or rectangle coords for the specy, where Point is like [xPosNumber, yPosNumber].
    */
-  drawSpecyRectangles(specyPopArray, specyPosY, specyColors, labels, startIndex,
-                      returnTriangleOriginCoords, opt_triangleOriginIsOnBottom) {
+  drawTrophicLevelRectangles(trophicLevel, trophicIndex) {
     var previousCumulatedPopPercent = 0.0;
-    // This represents the triangle origins for predators and the useful coords for preys
-    var specyCoords = [];
-    specyPopArray.forEach((specyPopPercent, specyIndex) => {
+    // This represents the rectangle coordinates
+    var rectangleCoords = [];
+    let yPos = trophicIndex * this.options.spaceBetweenLevels;
+
+    trophicLevel.populations.forEach((specyPopPercent, specyIndex) => {
       // Compute the rectangle coordinates
-      var leftPos = previousCumulatedPopPercent * this.options.canvasWidth + this.options.separatorWidth;
-      var width = specyPopPercent * this.options.canvasWidth - this.options.separatorWidth;
+      let leftPos = previousCumulatedPopPercent * this.options.canvasWidth + this.options.separatorWidth;
+      let width = specyPopPercent * this.options.canvasWidth - this.options.separatorWidth;
+      let specyColor = trophicLevel.colors[specyIndex % trophicLevel.colors.length];
 
       // Draw the rectangle
-      this.ctx.fillStyle = this.getColorFromArray(specyColors, specyIndex);
-      this.ctx.fillRect(leftPos, specyPosY, width, this.options.rectangleHeight);
+      this.ctx.fillStyle = specyColor.fill || this.options.defaultFillColor;
+      this.ctx.fillRect(leftPos, yPos, width, this.options.rectangleHeight);
 
       // Set the label style and content
       this.ctx.font = this.options.font;
-      this.ctx.fillStyle = this.getColorFromArray(specyColors, specyIndex, true);
-      var label;
-      if (labels !== null) {
-        // Custom labels are set: use them
-        label = labels[specyIndex];
-      } else {
-        // Else, use the index for the label
-        label = startIndex + specyIndex;
-        label = label.toString();
-      }
+      this.ctx.fillStyle = specyColor.text || this.options.defaultTextColor;
+      let label = trophicLevel.labels[specyIndex] || this.currentRectangleIndex.toString();
+      this.currentRectangleIndex++;
+
       // Compute the label position
       var labelPosX = leftPos + width/2 - label.length*4;
-      var labelPosY = specyPosY + this.options.rectangleHeight - 10;
+      var labelPosY = yPos + this.options.rectangleHeight - 10;
       // Draw the label
       this.ctx.fillText(label, labelPosX, labelPosY);
 
       // Update cumulated population percentage to position the next rectangle
       previousCumulatedPopPercent += specyPopPercent;
 
-      // Add triangle origin for this specy
-      if (returnTriangleOriginCoords) {
-        var triangleOriginY = (opt_triangleOriginIsOnBottom) ? specyPosY + this.options.rectangleHeight : specyPosY;
-        specyCoords.push([leftPos + width/2, triangleOriginY]);
-      } else {
-        specyCoords.push({
-                  topLeftPoint: [leftPos, specyPosY],
-                   bottomLeftPoint: [leftPos, specyPosY + this.options.rectangleHeight],
-                   width: width
-        });
-      }
+      // Add rectangle coords for this specy
+      rectangleCoords.push({
+        topLeftPoint: [leftPos, yPos],
+        width: width
+      });
     });
 
-    return specyCoords;
+    return Promise.resolve(rectangleCoords);
   }
+
+
+  // /**
+  //  * Validates the parameters passed, checking that the percentage sums are equal to 1.
+  //  *
+  //  * @param {Array<number>} predatorsPop Population percentage array of the predators (the sum must be 1).
+  //  * @param {Array<number>} preysPop Population percentage array of the preys (the sum must be 1).
+  //  * @param {Array<number>} otherPredatorsPop Population percentage array of the other predators (the sum must be 1).
+  //  * @param {Array<Array<number>>} occupationPreysPerPredators Matrix of occupations from predators to preys with percentages.
+  //  * @param {Array<Array<number>>} occupationPreysPerOtherPredators Matrix of occupations from other predators to preys with percentages.
+  //  * @return {boolean} true if the parameters are valid.
+  //  */
+  // validateMandatoryValues(predatorsPop, preysPop, otherPredatorsPop,
+  //                         occupationPreysPerPredators, occupationPreysPerOtherPredators) {
+  //   var paramsAreValid = true;
+  //
+  //   if (this.arraySum(predatorsPop) !== 1.0) {
+  //     alert("The sum of predator populations must be equal to 1.");
+  //     paramsAreValid = false;
+  //   }
+  //   if (this.arraySum(preysPop) !== 1.0) {
+  //     alert("The sum of preys populations must be equal to 1.");
+  //     paramsAreValid = false;
+  //   }
+  //   if (otherPredatorsPop.length > 0 && this.arraySum(otherPredatorsPop) !== 1.0) {
+  //     alert("The sum of other predator populations must be equal to 1.");
+  //     paramsAreValid = false;
+  //   }
+  //   if (occupationPreysPerPredators.length !== preysPop.length) {
+  //     alert("The predator occupations of preys must be set for every preys.");
+  //     paramsAreValid = false;
+  //   }
+  //   if (otherPredatorsPop.length > 0 && occupationPreysPerOtherPredators.length !== preysPop.length) {
+  //     alert("The other predator occupations of preys must be set for every preys.");
+  //     paramsAreValid = false;
+  //   }
+  //   if (occupationPreysPerPredators[0].length !== predatorsPop.length) {
+  //     alert("The predator occupations of preys must be set for every predators.");
+  //     paramsAreValid = false;
+  //   }
+  //   if (otherPredatorsPop.length > 0 && occupationPreysPerOtherPredators[0].length !== otherPredatorsPop.length) {
+  //     alert("The other predator occupations of preys must be set for every other predators.");
+  //     paramsAreValid = false;
+  //   }
+  //   occupationPreysPerPredators.forEach((occupationPreyPerPredators, preyIndex) => {
+  //     if (this.arraySum(occupationPreysPerPredators[preyIndex]) + this.arraySum(occupationPreysPerOtherPredators[preyIndex]) !== 1.0) {
+  //       var preyIndexShown = preyIndex+1;
+  //       alert("The sum of occupations of a prey by predators plus other predators must be equal to 1 (prey index "+ preyIndexShown +").");
+  //       paramsAreValid = false;
+  //     }
+  //   });
+  //
+  //   return paramsAreValid;
+  // }
+  //
+  //
+  // /**
+  //  * Draws the trophic network in the canvas element (called from drawTrophicNetwork once the parameters are set).
+  //  * Do not call this function  directly.
+  //  */
+  // draw() {
+  //   this.canvas = document.getElementById("canvas");
+  //   this.ctx = this.canvas.getContext("2d");
+  //   this.ctx.canvas.width = this.options.canvasWidth;
+  //   // Compute canvas height
+  //   var lastRectangleRowY = (this.otherPredatorsPop.length > 0) ? this.options.otherPredatorsPosY : this.options.preysPosY;
+  //   this.ctx.canvas.height = lastRectangleRowY + this.options.rectangleHeight;
+  //
+  //   // Start index for the rectangle label if not using custom labels
+  //   var startIndex = 1;
+  //
+  //   // Draw predators' rectangles and get their triangle origins
+  //   this.predatorsTriangleOrigin = this.drawSpecyRectangles(this.predatorsPop, this.options.predatorsPosY,
+  //                                this.options.predatorsColors, this.options.predatorsLabels,
+  //                                startIndex, true, true);
+  //   // Draw preys' rectangles and get the rectangles' coords
+  //   startIndex += this.predatorsPop.length;
+  //   this.preysCoords = this.drawSpecyRectangles(this.preysPop, this.options.preysPosY, this.options.preysColors,
+  //                         this.options.preysLabels, startIndex, false);
+  //
+  //   // Draw other predators' rectangles and get their triangle origins
+  //   startIndex += this.preysPop.length;
+  //   this.otherPredatorsTriangleOrigin = this.drawSpecyRectangles(this.otherPredatorsPop, this.options.otherPredatorsPosY,
+  //                                   this.options.otherPredatorsColors, this.options.otherPredatorsLabels,
+  //                                   startIndex, true);
+  //
+  //   // Draw the triangles from predators to preys
+  //   this.drawPredatorsToPreysTriangles(this.occupationPreysPerPredators, this.predatorsTriangleOrigin, this.options.predatorsColors);
+  //
+  //   // Draw the triangles from other predators to preys
+  //   this.drawPredatorsToPreysTriangles(this.occupationPreysPerOtherPredators, this.otherPredatorsTriangleOrigin,
+  //                     this.options.otherPredatorsColors, true);
+  // }
+  //
+  //
+  // /**
+  //  * Draws a specy's rectangles to represent the population.
+  //  *
+  //  * @param {Array<number>} specyPopArray Population array of the specy.
+  //  * @param {number} specyPosY Y position for the specy, in pixels.
+  //  * @param {Array<TwoColors>} specyColors Colors for the specy, where each TwoColors is like [mainColorString, textColorString].
+  //  * @param {Array<string>} labels Array of string labels to be drawn in the rectangles.
+  //  * @param {number} startIndex Start index for the label if labels parameter is null.
+  //  * @param {boolean} returnTriangleOriginCoords true to return an array of triangle origins, false to return other useful rectangle coords.
+  //  * @param {boolean} opt_triangleOriginIsOnBottom Optional, true if the triangle origin is on the bottom of the rectangle, useful only if returnTriangleOriginCoords is true.
+  //  * @return {Array<Point>|Array<{topLeftPoint:Point, bottomLeftPoint:Point, width:number}>} Array of triangle origins or rectangle coords for the specy, where Point is like [xPosNumber, yPosNumber].
+  //  */
+  // drawSpecyRectangles(specyPopArray, specyPosY, specyColors, labels, startIndex,
+  //                     returnTriangleOriginCoords, opt_triangleOriginIsOnBottom) {
+  //   var previousCumulatedPopPercent = 0.0;
+  //   // This represents the triangle origins for predators and the useful coords for preys
+  //   var specyCoords = [];
+  //   specyPopArray.forEach((specyPopPercent, specyIndex) => {
+  //     // Compute the rectangle coordinates
+  //     var leftPos = previousCumulatedPopPercent * this.options.canvasWidth + this.options.separatorWidth;
+  //     var width = specyPopPercent * this.options.canvasWidth - this.options.separatorWidth;
+  //
+  //     // Draw the rectangle
+  //     this.ctx.fillStyle = this.getColorFromArray(specyColors, specyIndex);
+  //     this.ctx.fillRect(leftPos, specyPosY, width, this.options.rectangleHeight);
+  //
+  //     // Set the label style and content
+  //     this.ctx.font = this.options.font;
+  //     this.ctx.fillStyle = this.getColorFromArray(specyColors, specyIndex, true);
+  //     var label;
+  //     if (labels !== null) {
+  //       // Custom labels are set: use them
+  //       label = labels[specyIndex];
+  //     } else {
+  //       // Else, use the index for the label
+  //       label = startIndex + specyIndex;
+  //       label = label.toString();
+  //     }
+  //     // Compute the label position
+  //     var labelPosX = leftPos + width/2 - label.length*4;
+  //     var labelPosY = specyPosY + this.options.rectangleHeight - 10;
+  //     // Draw the label
+  //     this.ctx.fillText(label, labelPosX, labelPosY);
+  //
+  //     // Update cumulated population percentage to position the next rectangle
+  //     previousCumulatedPopPercent += specyPopPercent;
+  //
+  //     // Add triangle origin for this specy
+  //     if (returnTriangleOriginCoords) {
+  //       var triangleOriginY = (opt_triangleOriginIsOnBottom) ? specyPosY + this.options.rectangleHeight : specyPosY;
+  //       specyCoords.push([leftPos + width/2, triangleOriginY]);
+  //     } else {
+  //       specyCoords.push({
+  //                 topLeftPoint: [leftPos, specyPosY],
+  //                  bottomLeftPoint: [leftPos, specyPosY + this.options.rectangleHeight],
+  //                  width: width
+  //       });
+  //     }
+  //   });
+  //
+  //   return specyCoords;
+  // }
 
 
   /**
@@ -310,13 +457,12 @@ class TrophicNetworkDrawer {
   /**
    * Gets the color corresponding to the index in the given array. Uses modulo function if the array is not big enough.
    *
-   * @param {Array<TwoColors>} colors Colors array, where each TwoColors is like [mainColorString, textColorString].
+   * @param {Array<Color>} colors Colors array (each color has tha attributes fill and text).
    * @param {number} index Index of the color to retrieve.
-   * @param {boolean} opt_forText true if the color to get is the text color, false to get the main color.
+   * @return
    */
-  getColorFromArray(colors, index, opt_forText) {
-    var typeOfColorIndex = (opt_forText) ? 1 : 0;
-    return colors[index % colors.length][typeOfColorIndex];
+  getColorFromArray(colors, index) {
+    return colors[index % colors.length];
   }
 
   /**
