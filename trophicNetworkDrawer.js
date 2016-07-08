@@ -48,6 +48,9 @@ class TrophicNetworkDrawer {
   drawTrophicNetwork(trophicLevels, options) {
     // Firstly, validate the mandatory values
     return this.validateTrophicLevels_(trophicLevels).then(() => {
+      // Use the options passed
+      this.options = Object.assign(this.options, options);
+      // Draw the trophic network
       return this.draw_(trophicLevels);
     }).catch((error) => {
       alert(`Could not draw the trophic network with the given trophic levels data:\n${error}`);
