@@ -11,7 +11,7 @@ predatory insects, hyperparasitoids, parasitoids, aphids and host plants.
 For each trophic level, you can provide the following information:
 - The populations of the different species in percentage (array of numbers between 0 and 1)
 - The occupation matrix of the trophic level by the previous trophic level (except for the first
-    trophic level): the lines represent the preys (current trophic level) and the rows represent
+    trophic level): the rows represent the preys (current trophic level) and the columns represent
     the predators (previous trophic level). Each number of the matrix must be a number between 0 and 1.
 - The colors to be used for drawing the trophic level. Each color is an object with the properties
     `fill` and `text`: the `fill` color is used for drawing the rectangles and the triangles starting
@@ -22,6 +22,13 @@ For each trophic level, you can provide the following information:
     transparency (e.g. "rgba(126,33,150,0.5)" where the components are red,green,blue,transparency).
 - (Optional) The labels to be shown in the species' rectangles. If not set, a unique number will be
     printed in the rectangles.
+
+To be valid, the sum of the populations of a trophic level must be equal to 1, each occupation
+matrix must have as many rows as the number of populations in the same trophic level and as many
+columns as the number of populations in the previous trophic level and the sum of each row of the
+occupation matrices must be equal to 1. The drawer will notify you about the errors in your trophic
+levels data when you try to draw a trophic network with invalid input and will let you know
+exactly what's wrong.
 
 Also, you can change a few options for the drawer by passing an options object with the following properties:
 - separatorWidth: the width separating two rectangles in pixels (default is 5)
