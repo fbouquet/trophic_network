@@ -165,10 +165,11 @@ class TrophicNetworkDrawer {
     trophicLevel.populations.forEach((specyPopPercent, specyIndex) => {
       // Compute the rectangle coordinates
       let leftPos = previousCumulatedPopPercent * this.options.canvasWidth;
+      let width = specyPopPercent * this.options.canvasWidth;
       if (specyIndex > 0) {
         leftPos += this.options.separatorWidth;
+        width -= this.options.separatorWidth;
       }
-      let width = specyPopPercent * this.options.canvasWidth - this.options.separatorWidth;
 
       // Determine the color
       let specyColorObj;
