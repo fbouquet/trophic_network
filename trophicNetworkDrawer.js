@@ -74,7 +74,7 @@ class TrophicNetworkDrawer {
       } else {
         trophicLevels.forEach((trophicLevel, trophicIndex) => {
           if (this.floatingNumberArraySum_(trophicLevel.populations) !== 1.0) {
-            errorMessage += `The sum of populations is not equal to 1 in the trophic ` +
+            errorMessage += `- The sum of populations is not equal to 1 in the trophic ` +
               `level #${trophicIndex+1}.\n`;
           }
 
@@ -82,20 +82,19 @@ class TrophicNetworkDrawer {
             let previousTrophicLevel = trophicLevels[trophicIndex - 1];
 
             if (trophicLevel.occupationPerPreviousLevel.length !== trophicLevel.populations.length) {
-              errorMessage += `The number of lines in the matrix occupationPerPreviousLevel of the ` +
-                `trophic level #${trophicIndex+1} should correspond to the number of populations given ` +
-                `in the previous trophic level.\n`;
+              errorMessage += `- The number of rows in the matrix occupationPerPreviousLevel of the ` +
+                `trophic level #${trophicIndex+1} should correspond to its number of populations.\n`;
             }
 
             trophicLevel.occupationPerPreviousLevel.forEach((occupationMatrixLine, occupationMatrixLineIndex) => {
               if (occupationMatrixLine.length !== previousTrophicLevel.populations.length) {
-                errorMessage += `The number of columns in the matrix occupationPerPreviousLevel of the ` +
-                  `trophic level #${trophicIndex+1} does not correspond its number of populations in ` +
-                  `the line #${occupationMatrixLineIndex+1} of the matrix.\n`;
+                errorMessage += `- The number of columns in the row #${occupationMatrixLineIndex+1} of ` +
+									`the matrix occupationPerPreviousLevel of the trophic level #${trophicIndex+1} does not ` +
+									`correspond to the number of populations given in the previous trophic level.\n`;
               }
 
               if (this.floatingNumberArraySum_(occupationMatrixLine) !== 1.0) {
-                errorMessage += `The total of the line #${occupationMatrixLineIndex+1} of the matrix ` +
+                errorMessage += `- The total of the line #${occupationMatrixLineIndex+1} of the matrix ` +
                   `occupationPerPreviousLevel of the trophic level #${trophicIndex+1} is not equal to 1.`;
               }
             });
