@@ -15,17 +15,16 @@
     <script type="application/x-javascript">
       function drawTrophicNetwork() {
         var trophicLevels = [
-          { // Hyper predators
+          { // Example: hyperparasitoids
             populations: [0.0236, 0.0448, 0.0212, 0.9104],
             colors: [
               { fill: "rgba(126,33,150,0.5)", text: "black" },
               { fill: "rgba(255,85,0,0.5)", text: "black" },
               { fill: "rgba(255,3,199,0.5)", text: "black" },
               { fill: "rgba(107,28,0,0.5)", text: "black" }
-            ],
-            labels: []
+            ]
           },
-          { // Predators
+          { // Example: parasitoids
             populations: [0.5652, 0.2633, 0.1715],
             occupationPerPreviousLevel: [
               [0.21, 0.18, 0.34, 0.27],
@@ -36,17 +35,27 @@
               { fill: "rgba(200,0,0,0.5)", text: "black" },
               { fill: "rgba(0,200,0,0.5)", text: "black" },
               { fill: "rgba(0,0,200,0.5)", text: "black" }
-            ],
-            labels: []
+            ]
           },
-          { // Preys
+          { // Example: aphids
             populations: [0.9702, 0.0298],
             occupationPerPreviousLevel: [
               [0.70, 0.20, 0.10],
               [0.17, 0.36, 0.47]
             ],
-            colors: [{ fill: 'black', text: 'white' }],
-            labels: []
+            colors: [
+              { fill: "rgba(0,51,51,0.5)", text: "black" },
+              { fill: "rgba(102,0,0,0.5)", text: "black" }
+            ]
+          },
+          { // Example: host plants
+            populations: [0.5602, 0.2308, 0.2090],
+            occupationPerPreviousLevel: [
+              [0.59, 0.41],
+              [0.23, 0.77],
+              [0.0, 1.0]
+            ],
+            colors: [{ fill: 'black', text: 'white' }]
           }
         ];
 
