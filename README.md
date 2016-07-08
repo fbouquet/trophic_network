@@ -1,9 +1,10 @@
 Trophic Network Drawer
 ======================
 
-This is a JavaScript library to draw trophic networks. To draw your own trophic network, you can
-use the existing `drawTrophic.html` file and change the trophic levels in it.
+This is a JavaScript library to draw trophic networks, under the MIT license.
 
+To draw your own trophic network, you can use the existing `drawTrophic.html` file and
+change the trophic levels in it.
 You can provide an arbitrary number of trophic levels (minimum is two levels).
 For example, the different trophic levels could represent, in the right order, birds,
 predatory insects, hyperparasitoids, parasitoids, aphids and host plants.
