@@ -36,8 +36,8 @@ class TrophicNetworkDrawer {
    *  - separatorWidth: 		the width separating two rectangles in pixels (default is 5);
    *  - rectangleHeight: 		the height of the rectangles in pixels (default is 30);
    *  - spaceBetweenLevels: the vertical space between two trophic levels in pixels (default is 150);
-   *  - defaultFillColor:		the default fill color in case the colors for a trophic level are not set;
-   *  - defaultTextColor:		the default text color in case the colors for a trophic level are not set;
+   *  - defaultFillColor:		the default fill color in case the colors for a trophic level are not set (default is black);
+   *  - defaultTextColor:		the default text color in case the colors for a trophic level are not set (default is white);
    *  - canvasWidth: 		   	the width of the canvas for the whole trophic network (default is 500);
    *  - font: 							the font to be used for the species' labels (default is "15px Arial").
    *
